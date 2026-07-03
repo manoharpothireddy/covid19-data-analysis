@@ -1,0 +1,37 @@
+# ============================================================
+# COVID-19 Data Analysis Pipeline - Python Dependencies
+# ============================================================
+
+# Core Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+scipy>=1.11.0
+
+# PostgreSQL Database Connector
+psycopg2-binary>=2.9.9
+
+# HTTP Downloads & Retry Logic
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Progress Bar for Downloads
+tqdm>=4.66.0
+
+# Environment Variable Management
+python-dotenv>=1.0.0
+
+# SQLAlchemy ORM (used by Pandas read_sql for optional query access)
+sqlalchemy>=2.0.0
+
+# Jupyter Notebook for EDA
+jupyter>=1.0.0
+ipykernel>=6.25.0
+nbformat>=5.9.0
+
+# Statistical Analysis & Visualization (for EDA notebook)
+matplotlib>=3.7.0
+seaborn>=0.12.0
+statsmodels>=0.14.0
+
+# Interactive Visualizations (for Jupyter + Dashboard)
+plotly>=5.15.0
