@@ -1,130 +1,99 @@
-# 🦠 COVID-19 Global Data Analysis & Interactive Dashboard
+🦠 COVID-19 Global Data Analysis & Interactive Dashboard
 
-> An end-to-end data analytics portfolio project — from raw data ingestion to
-> interactive dashboards — analysing 395,311 records across 237 countries
-> from January 2020 to August 2024, with a deep focus on India's pandemic waves
-> and global comparisons against the USA, Brazil, and the UK.
+An end-to-end data analytics portfolio project — from raw data ingestion to interactive dashboards — analysing 395,311 records across 237 countries from January 2020 to August 2024, with a deep focus on India's pandemic waves and global comparisons against the USA, Brazil, and the UK.
 
----
 
-## 📌 Table of Contents
-1. Project Overview
-2. Tools & Technologies
-3. Architecture
-4. Folder Structure
-5. Database Schema
-6. How to Run
-7. Key Findings & Insights
-8. Dashboard Screenshots
-9. SQL Highlights
-10. Dataset Source & Credits
+📌 Table of Contents
 
----
+Project Overview
+Tools & Technologies
+Architecture
+Folder Structure
+How to Run
+Key Findings & Insights
+Dashboard Screenshots
+Dataset Source & Credits
 
-## 🔍 Project Overview
 
-| Stage | What happens |
-|---|---|
-| Collection | Downloads OWID dataset with retry logic + synthetic fallback |
-| Cleaning | 10-step Pandas pipeline + 10 derived KPIs |
-| Storage | PostgreSQL COPY bulk load into star schema |
-| Analysis | SciPy wave detection, correlation, composite risk scoring |
-| SQL | 10 queries: CTEs, DISTINCT ON, window functions |
-| Visualisation | Plotly Dash + Tableau + Power BI |
+🔍 Project Overview
+StageWhat happensCollectionDownloads OWID dataset with retry logicCleaning10-step Pandas pipeline + 10 derived KPIsStoragePostgreSQL COPY bulk load into star schemaAnalysisSciPy wave detection, correlation, risk scoringSQL10 queries: CTEs, DISTINCT ON, window functionsVisualisationPlotly Dash + Tableau + Power BI
 
----
+🛠 Tools & Technologies
+ToolPurposePython 3.xETL pipeline and analysisPandas / NumPyData cleaning and transformationSciPyWave detection algorithmPostgreSQLStar schema databaseSQLAnalytics queries and viewsPlotly DashInteractive web dashboardTableau DesktopExecutive dashboardPower BI DesktopBI dashboard with DAX measuresJupyter NotebookEDA and visualizations
 
-## 🏗 Architecture
+🏗 Architecture
+DATA SOURCES → PYTHON ETL → POSTGRESQL → BI LAYER
+OWID CSV → data_collection.py → dim_country → Plotly Dash
+         → data_cleaning.py  → dim_date   → Tableau
+         → analysis.py       → fact_covid → Power BI
+         → database.py       → 7 Views    → Jupyter
 
-┌─────────────────────────────────────────────┐
-│           DATA SOURCES                      │
-│  OWID COVID-19 Dataset — CSV / HTTP         │
-└──────────────────┬──────────────────────────┘
-                   ▼
-┌─────────────────────────────────────────────┐
-│         PYTHON ETL PIPELINE                 │
-│  data_collection → data_cleaning →          │
-│  analysis → database                        │
-│  Orchestrated by: run.py                    │
-└──────────────────┬──────────────────────────┘
-                   ▼
-┌─────────────────────────────────────────────┐
-│      POSTGRESQL STAR SCHEMA                 │
-│  dim_country + dim_date + fact_covid_daily  │
-│  7 Dashboard Views                          │
-└──────┬──────────────────────┬───────────────┘
-       ▼                      ▼
-┌──────────────┐    ┌─────────────────────────┐
-│  JUPYTER     │    │       BI LAYER          │
-│  NOTEBOOK    │    │  Plotly Dash :8050      │
-│  7-cell EDA  │    │  Tableau Desktop        │
-└──────────────┘    │  Power BI Desktop       │
-                    └─────────────────────────┘
+📁 Folder Structure
+covid19-data-analysis/
+├── run.py
+├── requirements.txt
+├── README.md
+├── .env.example
+├── data/
+│   ├── raw/
+│   └── processed/
+├── src/
+│   ├── data_collection.py
+│   ├── data_cleaning.py
+│   ├── analysis.py
+│   └── database.py
+├── sql/
+│   ├── create_tables.sql
+│   ├── views.sql
+│   └── analysis_queries.sql
+├── notebooks/
+│   └── exploratory_analysis.ipynb
+├── dashboard/
+│   ├── app.py
+│   ├── layouts.py
+│   └── callbacks.py
+└── docs/
+    └── screenshots/
 
----
-
-## ▶ How to Run
-
-### Step 1 — Setup
-git clone https://github.com/your-username/covid19-data-analysis.git
+▶ How to Run
+Step 1 — Clone repository
+git clone https://github.com/manoharpothireddy/covid19-data-analysis.git
 cd covid19-data-analysis
+Step 2 — Setup
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-
-### Step 2 — Configure .env
+Step 3 — Configure .env
 copy .env.example .env
-# Edit .env: set DB_PASSWORD=your_password
-
-### Step 3 — Run pipeline
+set DB_PASSWORD=your_password
+Step 4 — Run pipeline
 python run.py
-
-### Step 4 — Launch dashboard
+Step 5 — Launch dashboard
 python dashboard/app.py
-# → http://127.0.0.1:8050
-
-### Step 5 — Open notebook
-jupytext --to notebook notebooks/exploratory_analysis.py
+Step 6 — Open notebook
 jupyter notebook notebooks/exploratory_analysis.ipynb
 
-### CLI flags
-python run.py --skip-download      # use cached CSV
-python run.py --skip-db            # offline mode (CSV fallback)
-python run.py --skip-download --reload  # fresh DB load
+📊 Key Findings
+🇮🇳 India — 6 Waves Detected
+WavePeak DatePeak Daily CasesVariantWave 1Sep 2020~97,000OriginalWave 2May 2021~414,000DeltaWave 3Sep 2021~45,000Delta subWave 4Jan 2022~347,000Omicron BA.1Wave 5Jul 2022~21,000Omicron BA.4/5Wave 6Apr 2023~12,000XBB variants
+💉 Vaccination Impact
 
----
+Pearson r = −0.42 between vaccination rate and CFR
+Countries above 70% vaccination had 40-55% lower CFR
 
-## 📊 Key Findings
-
-### 🇮🇳 India — 6 Waves Detected
-
-| Wave | Peak Date | Peak Daily Cases | Variant |
-|---|---|---|---|
-| Wave 1 | Sep 2020 | ~97,000 | Original |
-| Wave 2 | May 2021 | ~414,000 | Delta (deadliest) |
-| Wave 3 | Sep 2021 | ~45,000 | Delta sub |
-| Wave 4 | Jan 2022 | ~347,000 | Omicron BA.1 |
-| Wave 5 | Jul 2022 | ~21,000 | Omicron BA.4/5 |
-| Wave 6 | Apr 2023 | ~12,000 | XBB sub-variants |
-
-### 💉 Vaccination Impact
-- Pearson r = −0.42 (p < 0.01) between vaccination rate and CFR
-- Countries above 70% vaccination: 40–55% lower CFR in later waves
-
-### 🔺 High-Risk Scoring
+🔺 High-Risk Scoring
 Composite = CFR×0.4 + Deaths/M×0.4 + (1−VaxRate)×0.2
 
----
+📸 Dashboard Screenshots
+Tableau Dashboard
+Show Image
+Power BI Global Overview
+Show Image
+India Deep Dive
+Show Image
+Jupyter Notebook
+Show Image
 
-## 📋 Dataset Source
-
-| Item | Detail |
-|---|---|
-| Dataset | Our World in Data COVID-19 Dataset |
-| URL | https://github.com/owid/covid-19-data |
-| Coverage | 237 countries, Jan 2020 – present |
-| License | Creative Commons BY 4.0 |
-
-Citation:
-Mathieu, E., Ritchie, H., Rodés-Guirao, L. et al.
-"Coronavirus Pandemic (COVID-19)." Our World in Data (2020).
+📋 Dataset Source
+ItemDetailDatasetOur World in Data COVID-19 DatasetURLhttps://github.com/owid/covid-19-dataCoverage237 countries, Jan 2020 – presentLicenseCreative Commons BY 4.0
+Citation: Mathieu, E., Ritchie, H., Rodés-Guirao, L. et al. "Coronavirus Pandemic (COVID-19)." Our World in Data (2020).
