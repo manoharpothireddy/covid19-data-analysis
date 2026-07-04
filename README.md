@@ -63,22 +63,17 @@ visualizes insights through Matplotlib/Seaborn, Tableau, and Power BI dashboards
 ┌─────────────────────────────────────────────────┐
 │              DATA GENERATION                    │
 │   Faker + NumPy (seed=42, Indian locale)        │
-│   14,100 rows · 4 tables · Jan2022–Jan2024      │
+│   14,100 rows · 4 tables · Jan2022-Jan2024      │
 └────────────────────┬────────────────────────────┘
-│
 ▼
 ┌─────────────────────────────────────────────────┐
-│           PYTHON ETL PIPELINE                   │
+│           PYTHON ETL PIPELINE (scripts/)        │
 │                                                 │
 │  generate_data.py    →  Generate + validate     │
-│       ↓                                         │
 │  data_cleaning.py    →  Clean + RFM scoring     │
-│       ↓                                         │
 │  eda_analysis.py     →  8 plots + SQL queries   │
-│       ↓                                         │
 │  dashboard_export.py →  6 BI-ready CSV exports  │
 └────────────────────┬────────────────────────────┘
-│
 ▼
 ┌─────────────────────────────────────────────────┐
 │         SQLITE DATABASE (ecommerce.db)          │
@@ -87,76 +82,74 @@ visualizes insights through Matplotlib/Seaborn, Tableau, and Power BI dashboards
 │   products      (100 rows)                      │
 │   orders        (5,000 rows)                    │
 │   order_items   (8,000 rows)                    │
-│                                                 │
 │   8 SQL Analysis Queries                        │
-└──────────┬──────────────────────────────────────┘
-│
-▼
-┌──────────────────────────────────────────────────────────────────┐
-│                        BI LAYER                                  │
-│                                                                  │
-│   Jupyter Notebook          Tableau Desktop    Power BI Desktop  │
-│   ─────────────────         ────────────────   ───────────────   │
-│   Executed EDA              Dashboard 1        Page 1            │
-│   Inline charts             Sales Overview     Sales Overview    │
-│   RFM analysis              Dashboard 2        Page 2            │
-│                             Customer Intel     Customer Analysis │
-│                             Dashboard 3        Page 3            │
-│                             Product Perf       Product Perf      │
-└──────────────────────────────────────────────────────────────────┘
+└──────────┬──────────────────┬───────────────────┘
+▼                  ▼
+┌──────────────────┐  ┌───────────────────────────┐
+│  JUPYTER         │  │       BI LAYER            │
+│  NOTEBOOK        │  │                           │
+│  Executed EDA    │  │  Tableau Desktop          │
+│  Inline charts   │  │  Dashboard 1: Sales       │
+│  RFM analysis    │  │  Dashboard 2: Customers   │
+│                  │  │  Dashboard 3: Products    │
+│                  │  │                           │
+│                  │  │  Power BI Desktop         │
+│                  │  │  Page 1: Sales Overview   │
+│                  │  │  Page 2: Customer Analysis│
+│                  │  │  Page 3: Product Perf     │
+└──────────────────┘  └───────────────────────────┘
 
 ---
 
 ## 📁 Folder Structure
 ecommerce-sales-analysis/
 │
-├── run_pipeline.bat                # Windows: run all 4 scripts in order
-├── requirements.txt                # All Python dependencies
-├── README.md                       # Project documentation
-├── .gitignore                      # Git exclusion rules
-├── setup.sh                        # Mac/Linux environment setup
-├── setup.bat                       # Windows environment setup
+├── requirements.txt                    # All Python dependencies
+├── README.md                           # Project documentation
+├── .gitignore                          # Git exclusion rules
+├── setup.sh                            # Mac/Linux environment setup
+├── setup.bat                           # Windows environment setup
 │
-├── scripts/                        # Python pipeline scripts
-│   ├── generate_data.py            # Step 1 — Synthetic data generation
-│   ├── data_cleaning.py            # Step 2 — Cleaning + RFM scoring
-│   ├── eda_analysis.py             # Step 3 — EDA + 8 visualizations
-│   └── dashboard_export.py         # Step 4 — BI-ready CSV exports
+├── scripts/                            # Python pipeline scripts
+│   ├── generate_data.py                # Step 1 — Synthetic data generation
+│   ├── data_cleaning.py                # Step 2 — Cleaning + RFM scoring
+│   ├── eda_analysis.py                 # Step 3 — EDA + 8 visualizations
+│   └── dashboard_export.py             # Step 4 — BI-ready CSV exports
 │
-├── sql/                            # SQL files
-│   └── queries.sql                 # 8 business analysis queries
+├── sql/                                # SQL files
+│   └── queries.sql                     # 8 business analysis queries
 │
 ├── notebooks/
-│   └── ecommerce_analysis.ipynb   # Fully executed EDA notebook
+│   └── ecommerce_analysis.ipynb        # Fully executed EDA notebook
 │
 ├── dashboards/
-│   └── DASHBOARD_GUIDE.md         # Tableau + Power BI build guide
+│   └── DASHBOARD_GUIDE.md             # Tableau + Power BI build guide
 │
 ├── data/
-│   ├── raw/                        # Original generated data
-│   │   ├── customers.csv           # 1,000 customers (Indian locale)
-│   │   ├── products.csv            # 100 products across 6 categories
-│   │   ├── orders.csv              # 5,000 orders (2022–2024)
-│   │   ├── order_items.csv         # 8,000 order line items
-│   │   └── ecommerce.db            # SQLite DB (all 4 tables loaded)
+│   ├── raw/                            # Original generated data
+│   │   ├── customers.csv               # 1,000 customers (Indian locale)
+│   │   ├── products.csv                # 100 products across 6 categories
+│   │   ├── orders.csv                  # 5,000 orders (2022-2024)
+│   │   ├── order_items.csv             # 8,000 order line items
+│   │   └── ecommerce.db                # SQLite DB (all 4 tables loaded)
 │   │
-│   └── processed/                  # Cleaned & feature-engineered data
-│       ├── customers_clean.csv     # + tenure_days column
-│       ├── products_clean.csv      # + profit_margin column
-│       ├── orders_clean.csv        # + year/month/quarter/weekday
-│       ├── order_items_clean.csv   # + recalculated total_price
-│       ├── rfm_scores.csv          # RFM scores + segment labels
+│   └── processed/                      # Cleaned & feature-engineered data
+│       ├── customers_clean.csv         # + tenure_days column
+│       ├── products_clean.csv          # + profit_margin column
+│       ├── orders_clean.csv            # + year/month/quarter/weekday
+│       ├── order_items_clean.csv       # + recalculated total_price
+│       ├── rfm_scores.csv              # RFM scores + segment labels
 │       │
-│       └── dashboard_exports/      # Tableau & Power BI ready files
-│           ├── kpi_summary.csv     # 1-row KPI snapshot for cards
-│           ├── monthly_revenue.csv # Year-month revenue trend
+│       └── dashboard_exports/          # Tableau & Power BI ready files
+│           ├── kpi_summary.csv         # 1-row KPI snapshot for cards
+│           ├── monthly_revenue.csv     # Year-month revenue trend
 │           ├── category_performance.csv
-│           ├── customer_segments.csv  # Customers merged with RFM
+│           ├── customer_segments.csv   # Customers merged with RFM
 │           ├── product_performance.csv
-│           └── daily_orders.csv    # Gap-filled daily orders (731 rows)
+│           └── daily_orders.csv        # Gap-filled daily orders (731 rows)
 │
 └── outputs/
-└── plots/                      # All chart outputs (PNG, 150 DPI)
+└── plots/                          # All chart outputs (PNG, 150 DPI)
 ├── top_products_revenue.png
 ├── monthly_revenue_trend.png
 ├── revenue_by_category.png
@@ -201,36 +194,27 @@ chmod +x setup.sh && ./setup.sh
 
 ### Step 3 — Run Full Pipeline
 ```bash
-# Step 1 — Generate 14,100 rows of synthetic data + SQLite DB
 python scripts/generate_data.py
-
-# Step 2 — Clean all tables, add feature columns, compute RFM scores
 python scripts/data_cleaning.py
-
-# Step 3 — Generate 8 EDA plots + run 4 SQL queries
 python scripts/eda_analysis.py
-
-# Step 4 — Export 6 dashboard-ready CSVs for Tableau / Power BI
 python scripts/dashboard_export.py
 ```
 
 Expected output:
-✅ Data generation complete — 4 tables saved to data/raw/
-✅ Cleaning complete — Files saved to data/processed/
-✅ EDA complete — 8 plots saved to outputs/plots/
-✅ Dashboard exports complete — 6 files saved to dashboard_exports/
+[1/4] Data Generation    ✔  PASSED  (14,100 rows created)
+[2/4] Data Cleaning      ✔  PASSED  (RFM scores computed)
+[3/4] EDA Analysis       ✔  PASSED  (8 plots saved)
+[4/4] Dashboard Export   ✔  PASSED  (6 CSV files exported)
 
 ### Step 4 — Launch Jupyter Notebook (Optional)
 ```bash
 jupyter notebook notebooks/ecommerce_analysis.ipynb
-# Select kernel → Python (ecommerce-analysis)
-# Run All Cells
 ```
 
 ### Step 5 — Connect to Tableau / Power BI
 
 Open Tableau Desktop or Power BI Desktop
-Connect → Text File / CSV
+Connect to Text File / CSV
 Navigate to data/processed/dashboard_exports/
 Load all 6 CSV files
 Follow dashboards/DASHBOARD_GUIDE.md for build steps
@@ -244,24 +228,24 @@ Follow dashboards/DASHBOARD_GUIDE.md for build steps
 
 | KPI | Value |
 |-----|-------|
-| Total Revenue | ₹4.88 Cr (delivered orders only) |
+| Total Revenue | Rs 4.88 Cr (delivered orders only) |
 | Total Orders | 5,000 |
 | Delivered Orders | 3,470 (69.4%) |
 | Returned Orders | 505 (10.1%) |
 | Cancelled Orders | 505 (10.1%) |
-| Avg Order Value | ₹14,067 |
+| Avg Order Value | Rs 14,067 |
 | Total Customers | 1,000 |
 
 ### 🏆 Category Performance
 
 | Category | Revenue | Share | Return Rate |
 |----------|---------|-------|-------------|
-| Electronics | ₹1.49 Cr | 21.0% | 10.38% |
-| Sports | ₹1.11 Cr | 15.7% | 11.15% |
-| Home & Kitchen | ₹1.10 Cr | 15.5% | 8.97% |
-| Clothing | ₹0.61 Cr | 8.7% | 10.14% |
-| Beauty | ₹0.41 Cr | 5.7% | 11.52% |
-| Books | ₹0.16 Cr | 2.3% | 9.15% |
+| Electronics | Rs 1.49 Cr | 21.0% | 10.38% |
+| Sports | Rs 1.11 Cr | 15.7% | 11.15% |
+| Home & Kitchen | Rs 1.10 Cr | 15.5% | 8.97% |
+| Clothing | Rs 0.61 Cr | 8.7% | 10.14% |
+| Beauty | Rs 0.41 Cr | 5.7% | 11.52% |
+| Books | Rs 0.16 Cr | 2.3% | 9.15% |
 
 ### 💳 Payment Methods
 
@@ -277,21 +261,21 @@ Follow dashboards/DASHBOARD_GUIDE.md for build steps
 
 | Segment | Count | % | Avg Spend | Avg Orders | Avg Recency |
 |---------|-------|---|-----------|------------|-------------|
-| Loyal Customers | 426 | 44.4% | ₹65,997 | 4.7 | 142 days |
-| Others | 246 | 25.6% | ₹31,845 | 2.3 | 95 days |
-| At Risk | 118 | 12.3% | ₹39,141 | 2.9 | 288 days |
-| Lost | 116 | 12.1% | ₹19,766 | 1.5 | 447 days |
-| Champions | 54 | 5.6% | ₹1,10,257 | 6.8 | 25 days |
+| Loyal Customers | 426 | 44.4% | Rs 65,997 | 4.7 | 142 days |
+| Others | 246 | 25.6% | Rs 31,845 | 2.3 | 95 days |
+| At Risk | 118 | 12.3% | Rs 39,141 | 2.9 | 288 days |
+| Lost | 116 | 12.1% | Rs 19,766 | 1.5 | 447 days |
+| Champions | 54 | 5.6% | Rs 1,10,257 | 6.8 | 25 days |
 
 ### 🌟 Notable Insights
 
-- 📅 **Peak AOV Month:** November 2022 — ₹21,608 average order value (festive season)
-- 🥇 **Top Customer:** Shanaya Sood (Premium, Pune) — ₹2,26,615 across 11 orders
-- 🏅 **Top Product:** Wireless Earbuds — ₹23,34,075 total revenue
-- 🏆 **Champions (5.6%)** average ₹1.1 Lakh spend with only 25 days since last order
-- 📉 **Lost segment (12.1%)** hasn't ordered in 447 days — prime re-engagement targets
-- 💡 **Beauty** has highest return rate at 11.52% — needs product quality review
-- 💳 **UPI dominates** at 35.3% — offering UPI cashback could increase basket size
+- Peak AOV Month: November 2022 — Rs 21,608 average order value (festive season)
+- Top Customer: Shanaya Sood (Premium, Pune) — Rs 2,26,615 across 11 orders
+- Top Product: Wireless Earbuds — Rs 23,34,075 total revenue
+- Champions (5.6%) average Rs 1.1 Lakh spend with only 25 days since last order
+- Lost segment (12.1%) has not ordered in 447 days — prime re-engagement targets
+- Beauty has highest return rate at 11.52% — needs product quality review
+- UPI dominates at 35.3% — offering UPI cashback could increase basket size
 
 ---
 
@@ -319,7 +303,7 @@ Follow dashboards/DASHBOARD_GUIDE.md for build steps
 
 ## 🗂 SQL Highlights
 
-### 8 Business SQL Queries in `sql/queries.sql`
+### 8 Business SQL Queries in sql/queries.sql
 
 | # | Query | Technique |
 |---|-------|-----------|
@@ -380,7 +364,7 @@ LIMIT 10;
 | **Seed** | 42 (fully reproducible) |
 | **Customers** | 1,000 rows |
 | **Products** | 100 rows across 6 categories |
-| **Orders** | 5,000 rows (2022–2024) |
+| **Orders** | 5,000 rows (2022-2024) |
 | **Order Items** | 8,000 rows |
 | **Total Records** | 14,100 rows |
 | **Database** | SQLite (ecommerce.db) |
