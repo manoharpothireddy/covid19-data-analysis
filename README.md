@@ -65,12 +65,14 @@ insights through Plotly Dash, Tableau, and Power BI dashboards.
 ---
 
 ## 🏗 Architecture
+
+```
 ┌─────────────────────────────────────────────────┐
 │              DATA SOURCE                        │
 │   OWID COVID-19 Dataset (CSV / HTTP)            │
 │   395,311 rows · 237 countries · Jan2020-Aug2024│
 └────────────────────┬────────────────────────────┘
-▼
+                     ▼
 ┌─────────────────────────────────────────────────┐
 │           PYTHON ETL PIPELINE (run.py)          │
 │                                                 │
@@ -79,7 +81,7 @@ insights through Plotly Dash, Tableau, and Power BI dashboards.
 │  analysis.py         →  Wave detect + score     │
 │  database.py         →  COPY bulk load to PG    │
 └────────────────────┬────────────────────────────┘
-▼
+                     ▼
 ┌─────────────────────────────────────────────────┐
 │         POSTGRESQL STAR SCHEMA                  │
 │                                                 │
@@ -89,7 +91,7 @@ insights through Plotly Dash, Tableau, and Power BI dashboards.
 │   fact_covid_daily  (395,311 rows)              │
 │   7 Dashboard Views                             │
 └──────────┬───────────────────┬──────────────────┘
-▼                   ▼
+           ▼                   ▼
 ┌──────────────────┐  ┌────────────────────────────┐
 │  JUPYTER         │  │        BI LAYER            │
 │  NOTEBOOK        │  │                            │
@@ -97,10 +99,13 @@ insights through Plotly Dash, Tableau, and Power BI dashboards.
 │  Plotly charts   │  │  Tableau Desktop           │
 │  Wave analysis   │  │  Power BI Desktop          │
 └──────────────────┘  └────────────────────────────┘
+```
 
 ---
 
 ## 📁 Folder Structure
+
+```
 covid19-data-analysis/
 │
 ├── run.py                          # Master pipeline orchestrator
@@ -109,46 +114,49 @@ covid19-data-analysis/
 ├── .env.example                    # Environment variables template
 ├── .gitignore                      # Git exclusion rules
 │
-├── src/
-│   ├── init.py
-│   ├── data_collection.py
-│   ├── data_cleaning.py
-│   ├── analysis.py
-│   └── database.py
+├── src/                            # Python source code
+│   ├── __init__.py                 # Package initializer
+│   ├── data_collection.py          # OWID download with retry + fallback
+│   ├── data_cleaning.py            # Cleaning, imputation, derived metrics
+│   ├── analysis.py                 # Wave detection, correlation, risk scoring
+│   └── database.py                 # PostgreSQL COPY bulk load + validation
 │
-├── sql/
-│   ├── create_tables.sql
-│   ├── views.sql
-│   └── analysis_queries.sql
+├── sql/                            # SQL files
+│   ├── create_tables.sql           # Star schema DDL
+│   ├── views.sql                   # 7 dashboard-ready PostgreSQL views
+│   └── analysis_queries.sql        # 10 advanced portfolio SQL queries
 │
 ├── notebooks/
-│   └── exploratory_analysis.ipynb
+│   └── exploratory_analysis.ipynb  # 7-cell EDA with Plotly charts
 │
-├── dashboard/
-│   ├── app.py
-│   ├── layouts.py
-│   ├── callbacks.py
-│   ├── assets/
-│   └── COVID19_Dashboard.twb
+├── dashboard/                      # Plotly Dash web app
+│   ├── app.py                      # Dash entry point
+│   ├── layouts.py                  # 4-page dashboard layouts
+│   ├── callbacks.py                # 5 interactive callbacks
+│   ├── assets/                     # CSS dark theme styles
+│   └── COVID19_Dashboard.twb       # Tableau workbook
 │
 ├── data/
-│   ├── raw/
-│   └── processed/
-│       ├── covid_cleaned.csv
-│       ├── india_covid.csv
-│       ├── country_summary.csv
+│   ├── raw/                        # Original OWID CSV (unmodified)
+│   └── processed/                  # Cleaned CSVs + SQL exports
+│       ├── covid_cleaned.csv       # Global cleaned dataset (395,311 rows)
+│       ├── india_covid.csv         # India-specific dataset (1,682 rows)
+│       ├── country_summary.csv     # Latest snapshot per country (237 rows)
 │       ├── analysis/
-│       │   ├── risk_scores.csv
+│       │   ├── risk_scores.csv     # Composite risk scores (212 countries)
 │       │   ├── correlation_matrix.csv
 │       │   └── india_with_waves.csv
-│       └── sql_results/
+│       └── sql_results/            # SQL view exports for BI tools
 │
 └── docs/
-└── screenshots/
+    └── screenshots/                # Dashboard screenshots
+```
 
 ---
 
 ## 🗄 Database Schema
+
+```
 ┌─────────────────┐         ┌──────────────────────┐
 │   dim_country   │         │      dim_date        │
 │─────────────────│         │──────────────────────│
@@ -160,26 +168,27 @@ covid19-data-analysis/
 │ gdp_per_capita  │         │ week_of_year         │
 │ human_dev_index │         └──────────┬───────────┘
 └────────┬────────┘                    │
-└──────────────┬──────────────┘
-▼
-┌────────────────────────┐
-│    fact_covid_daily    │
-│────────────────────────│
-│ iso_code (FK)          │
-│ date (FK)              │
-│ total_cases            │
-│ new_cases              │
-│ new_cases_smoothed     │
-│ total_deaths           │
-│ new_deaths             │
-│ total_vaccinations     │
-│ people_fully_vaccinated│
-│ vaccination_rate       │
-│ case_fatality_rate     │
-│ rolling_7day_cases     │
-│ rolling_14day_cases    │
-│ wave_number            │
-└────────────────────────┘
+         └──────────────┬──────────────┘
+                        ▼
+           ┌────────────────────────┐
+           │    fact_covid_daily    │
+           │────────────────────────│
+           │ iso_code (FK)          │
+           │ date (FK)              │
+           │ total_cases            │
+           │ new_cases              │
+           │ new_cases_smoothed     │
+           │ total_deaths           │
+           │ new_deaths             │
+           │ total_vaccinations     │
+           │ people_fully_vaccinated│
+           │ vaccination_rate       │
+           │ case_fatality_rate     │
+           │ rolling_7day_cases     │
+           │ rolling_14day_cases    │
+           │ wave_number            │
+           └────────────────────────┘
+```
 
 > ⚠ **IMPORTANT:** `total_*` columns are CUMULATIVE.
 > Always use `MAX()` — never `SUM()` across dates.
@@ -191,8 +200,8 @@ covid19-data-analysis/
 ### Prerequisites
 - Python 3.9+
 - PostgreSQL 18 installed and running
-- Tableau Desktop
-- Power BI Desktop
+- Tableau Desktop (for .twb dashboard)
+- Power BI Desktop (for Power BI dashboard)
 
 ### Step 1 — Clone Repository
 ```bash
@@ -202,8 +211,13 @@ cd covid19-data-analysis
 
 ### Step 2 — Create Virtual Environment
 ```bash
+# Windows
 python -m venv venv
 .\venv\Scripts\Activate.ps1
+
+# Mac/Linux
+python -m venv venv
+source venv/bin/activate
 ```
 
 ### Step 3 — Install Dependencies
@@ -213,12 +227,25 @@ pip install -r requirements.txt
 
 ### Step 4 — Configure Environment
 ```bash
+# Windows
 copy .env.example .env
-# Set DB_PASSWORD=your_password in .env
+
+# Mac/Linux
+cp .env.example .env
+```
+
+Open `.env` and fill in your PostgreSQL credentials:
+```
+DB_NAME=covid19_analysis
+DB_USER=postgres
+DB_PASSWORD=your_password
+DB_HOST=localhost
+DB_PORT=5432
 ```
 
 ### Step 5 — Create PostgreSQL Database
 ```sql
+-- Run in pgAdmin or psql
 CREATE DATABASE covid19_analysis;
 ```
 
@@ -228,28 +255,31 @@ python run.py
 ```
 
 Expected output:
+```
 [1/4] Data Collection   ✔  PASSED  (93.8 MB downloaded)
 [2/4] Data Cleaning     ✔  PASSED  (395,311 rows processed)
 [3/4] Analysis          ✔  PASSED  (6 India waves detected)
 [4/4] Database Load     ✔  PASSED  (star schema populated)
+```
 
 ### Step 7 — Launch Dash Dashboard
 ```bash
 cd dashboard
 python app.py
-# Open → http://127.0.0.1:8050
+# Open browser → http://127.0.0.1:8050
 ```
 
 ### Step 8 — Open Jupyter Notebook
 ```bash
 jupyter notebook notebooks/exploratory_analysis.ipynb
+# Kernel → Restart and Run All
 ```
 
-### ⚙ CLI Flags
+### ⚙ Pipeline CLI Flags
 ```bash
-python run.py --skip-download
-python run.py --skip-db
-python run.py --skip-download --reload
+python run.py --skip-download           # Use cached CSV
+python run.py --skip-db                 # Offline mode (CSV only)
+python run.py --skip-download --reload  # Fresh DB load
 ```
 
 ---
@@ -267,13 +297,21 @@ python run.py --skip-download --reload
 | Wave 5 | 27 Jul 2022 | 19,737 | Omicron BA.4/5 |
 | Wave 6 | 26 Apr 2023 | 10,553 | XBB sub-variants |
 
+> Peaks detected using `scipy.signal.find_peaks` on 7-day smoothed cases
+> with `distance=30` and `prominence=5000`.
+
 ### 💉 Vaccination Impact
 - **Pearson r = −0.41** (p < 0.001) between vaccination rate and CFR
-- **Spearman ρ = −0.55** (p < 0.001)
-- Higher vaccination rates linked to lower case fatality rates
+- **Spearman ρ = −0.55** (p < 0.001) — strong negative correlation
+- Higher vaccination rates consistently linked to lower case fatality rates
 
 ### 🔺 High-Risk Country Scoring
-Composite Risk = (CFR × 0.4) + (Deaths/M × 0.4) + (1 − VaxRate × 0.2)
+```
+Composite Risk Score =
+    (CFR × 0.4) +
+    (Deaths per Million normalized × 0.4) +
+    (1 − Vaccination Rate × 0.2)
+```
 
 ### 🌍 Global Statistics
 - Total confirmed cases: **776M+**
@@ -285,7 +323,7 @@ Composite Risk = (CFR × 0.4) + (Deaths/M × 0.4) + (1 − VaxRate × 0.2)
 
 ## 📸 Dashboard Screenshots
 
-### Plotly Dash
+### Plotly Dash — Interactive Web Dashboard
 ![Dash](docs/screenshots/dash_dashboard.png)
 
 ### Tableau — Global Executive Dashboard
@@ -300,31 +338,39 @@ Composite Risk = (CFR × 0.4) + (Deaths/M × 0.4) + (1 − VaxRate × 0.2)
 ### Jupyter — India Wave Analysis
 ![Jupyter Waves](docs/screenshots/jupyter_india_waves.png)
 
+### Jupyter — Vaccination vs CFR Scatter
+![Jupyter Scatter](docs/screenshots/jupyter_vaccination_scatter.png)
+
 ---
 
 ## 🗂 SQL Highlights
 
+### 7 Dashboard-Ready Views
 | View | Purpose |
 |------|---------|
-| `v_country_latest` | Latest snapshot per country |
-| `v_global_daily_trend` | Daily global aggregates |
-| `v_india_timeline` | India daily timeline |
-| `v_continental_summary` | Continent rollup |
-| `v_high_risk_countries` | Top 20 risk countries |
-| `v_vaccination_progress` | Vaccination over time |
-| `v_india_vs_benchmarks` | India vs USA, Brazil, UK |
+| `v_country_latest` | Latest snapshot per country using DISTINCT ON |
+| `v_global_daily_trend` | Daily global aggregates (SUM of new_* columns) |
+| `v_india_timeline` | Complete India daily timeline |
+| `v_continental_summary` | Continent-level rollup |
+| `v_high_risk_countries` | Top 20 by composite risk score |
+| `v_vaccination_progress` | Vaccination rate over time |
+| `v_india_vs_benchmarks` | India vs USA, Brazil, UK comparison |
 
+### Key SQL Techniques Used
 ```sql
--- Safe cumulative aggregation
+-- 1. DISTINCT ON for latest row per country
 SELECT DISTINCT ON (iso_code) *
 FROM fact_covid_daily
 ORDER BY iso_code, date DESC;
 
--- Month-over-Month growth
+-- 2. LAG() for Month-over-Month growth
 LAG(SUM(new_cases)) OVER (
     PARTITION BY location
     ORDER BY DATE_TRUNC('month', date)
 ) AS prev_month_cases
+
+-- 3. Safe division with NULLIF
+DIVIDE(total_deaths, NULLIF(total_cases, 0)) * 100 AS cfr_pct
 ```
 
 ---
@@ -336,11 +382,13 @@ LAG(SUM(new_cases)) OVER (
 | **Dataset** | Our World in Data COVID-19 Dataset |
 | **URL** | https://github.com/owid/covid-19-data |
 | **Coverage** | 237 countries, Jan 2020 – present |
-| **Records** | 395,311 rows, 48 columns |
+| **Records** | 395,311 rows, 48 columns after cleaning |
 | **License** | Creative Commons BY 4.0 |
 
+**Citation:**
 > Mathieu, E., Ritchie, H., Rodés-Guirao, L. et al.
-> "Coronavirus Pandemic (COVID-19)." Our World in Data (2020).
+> "Coronavirus Pandemic (COVID-19)." *Our World in Data* (2020).
+> https://ourworldindata.org/coronavirus
 
 ---
 
