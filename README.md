@@ -1,9 +1,9 @@
-# 🛒 E-Commerce Sales & Customer Behavior Analysis
+# 🦠 COVID-19 Global Data Analysis & Interactive Dashboard
 
-> An end-to-end data analytics portfolio project — from synthetic data generation to
-> interactive dashboards — analysing **14,100 records** across **1,000 customers**,
-> **100 products**, and **5,000 orders** spanning **January 2022 to January 2024**,
-> with deep focus on revenue trends, RFM customer segmentation, and product performance.
+> An end-to-end data analytics portfolio project — from raw data ingestion to
+> interactive dashboards — analysing **395,311 records** across **237 countries**
+> from **January 2020 to August 2024**, with a deep focus on India's pandemic
+> waves and global comparisons against the USA, Brazil, and the UK.
 
 ---
 
@@ -12,30 +12,31 @@
 2. [Tools & Technologies](#-tools--technologies)
 3. [Architecture](#-architecture)
 4. [Folder Structure](#-folder-structure)
-5. [How to Run](#-how-to-run)
-6. [Key Findings](#-key-findings)
-7. [Dashboard Screenshots](#-dashboard-screenshots)
-8. [SQL Highlights](#-sql-highlights)
-9. [Dataset Details](#-dataset-details)
+5. [Database Schema](#-database-schema)
+6. [How to Run](#-how-to-run)
+7. [Key Findings](#-key-findings)
+8. [Dashboard Screenshots](#-dashboard-screenshots)
+9. [SQL Highlights](#-sql-highlights)
+10. [Dataset Source & Credits](#-dataset-source--credits)
 
 ---
 
 ## 🔍 Project Overview
 
-This project performs a complete end-to-end e-commerce data analysis using a
-synthetic Indian e-commerce dataset generated with Faker and NumPy. The pipeline
-generates, cleans, transforms, and loads data into a SQLite database, then
-visualizes insights through Matplotlib/Seaborn, Tableau, and Power BI dashboards.
+This project performs a complete end-to-end COVID-19 data analysis using
+the Our World in Data (OWID) dataset. The pipeline downloads, cleans,
+transforms, and loads data into a PostgreSQL star schema, then visualizes
+insights through Plotly Dash, Tableau, and Power BI dashboards.
 
 | Stage | Tool | What Happens |
 |-------|------|-------------|
-| **Generation** | `generate_data.py` | Creates 14,100 rows of realistic Indian e-commerce data |
-| **Cleaning** | `data_cleaning.py` | 9-step Pandas pipeline, RFM scoring, feature engineering |
-| **Analysis** | `eda_analysis.py` | 8 publication-quality plots + 4 SQL queries |
-| **Storage** | SQLAlchemy + SQLite | Bulk load into SQLite database |
-| **SQL** | `queries.sql` | 8 queries: revenue trends, top products, return rates |
-| **Visualization** | Tableau + Power BI | 3 interactive dashboards each |
-| **EDA** | Jupyter Notebook | Fully executed notebook with inline charts |
+| **Collection** | `data_collection.py` | Downloads OWID CSV with retry logic + fallback |
+| **Cleaning** | `data_cleaning.py` | 10-step Pandas pipeline, 10 derived KPIs |
+| **Analysis** | `analysis.py` | SciPy wave detection, correlation, risk scoring |
+| **Storage** | `database.py` | PostgreSQL COPY bulk load into star schema |
+| **SQL** | `analysis_queries.sql` | 10 queries: CTEs, window functions, DISTINCT ON |
+| **Visualization** | Dash + Tableau + Power BI | Interactive dashboards |
+| **EDA** | Jupyter Notebook | 7-cell exploratory analysis with Plotly charts |
 
 ---
 
@@ -43,342 +44,313 @@ visualizes insights through Matplotlib/Seaborn, Tableau, and Power BI dashboards
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Python | 3.12 | Core language |
-| Pandas | 2.1.4 | Data manipulation & preprocessing |
-| NumPy | 1.26.2 | Numerical computations |
-| Matplotlib | 3.8.2 | Static chart generation |
-| Seaborn | 0.13.0 | Statistical visualizations |
-| Scikit-learn | 1.3.2 | KMeans clustering, preprocessing |
-| SQLAlchemy | 2.0.23 | ORM & SQL query execution |
-| SQLite | built-in | Lightweight relational database |
-| Faker | 20.1.0 | Synthetic data generation (Indian locale) |
-| openpyxl | 3.1.2 | Excel export support |
-| Jupyter | 1.0.0 | Interactive notebook analysis |
-| Tableau Desktop | — | 3 interactive sales dashboards |
-| Power BI Desktop | — | 3 interactive BI dashboard pages |
+| Python | 3.x | ETL pipeline and analysis |
+| Pandas | ≥ 2.0.0 | Data cleaning and transformation |
+| NumPy | ≥ 1.24.0 | Numerical computations |
+| SciPy | ≥ 1.11.0 | Wave detection algorithm |
+| psycopg2 | ≥ 2.9.9 | PostgreSQL connector |
+| SQLAlchemy | ≥ 2.0.0 | ORM for Pandas read_sql |
+| requests | ≥ 2.31.0 | OWID dataset download |
+| tqdm | ≥ 4.66.0 | Download progress bar |
+| python-dotenv | ≥ 1.0.0 | Environment variable management |
+| Plotly | ≥ 5.15.0 | Interactive visualizations |
+| Matplotlib | ≥ 3.7.0 | Static charts in notebook |
+| Seaborn | ≥ 0.12.0 | Missing value heatmap |
+| statsmodels | ≥ 0.14.0 | Statistical analysis |
+| Jupyter | ≥ 1.0.0 | EDA notebook |
+| PostgreSQL | 18 | Star schema database |
+| Tableau Desktop | Latest | Executive dashboard |
+| Power BI Desktop | Latest | BI dashboard with DAX |
 
 ---
 
 ## 🏗 Architecture
 ┌─────────────────────────────────────────────────┐
-│              DATA GENERATION                    │
-│   Faker + NumPy (seed=42, Indian locale)        │
-│   14,100 rows · 4 tables · Jan2022-Jan2024      │
+│              DATA SOURCE                        │
+│   OWID COVID-19 Dataset (CSV / HTTP)            │
+│   395,311 rows · 237 countries · Jan2020-Aug2024│
 └────────────────────┬────────────────────────────┘
 ▼
 ┌─────────────────────────────────────────────────┐
-│           PYTHON ETL PIPELINE (scripts/)        │
+│           PYTHON ETL PIPELINE (run.py)          │
 │                                                 │
-│  generate_data.py    →  Generate + validate     │
-│  data_cleaning.py    →  Clean + RFM scoring     │
-│  eda_analysis.py     →  8 plots + SQL queries   │
-│  dashboard_export.py →  6 BI-ready CSV exports  │
+│  data_collection.py  →  Download + validate     │
+│  data_cleaning.py    →  Clean + transform       │
+│  analysis.py         →  Wave detect + score     │
+│  database.py         →  COPY bulk load to PG    │
 └────────────────────┬────────────────────────────┘
 ▼
 ┌─────────────────────────────────────────────────┐
-│         SQLITE DATABASE (ecommerce.db)          │
+│         POSTGRESQL STAR SCHEMA                  │
 │                                                 │
-│   customers     (1,000 rows)                    │
-│   products      (100 rows)                      │
-│   orders        (5,000 rows)                    │
-│   order_items   (8,000 rows)                    │
-│   8 SQL Analysis Queries                        │
-└──────────┬──────────────────┬───────────────────┘
-▼                  ▼
-┌──────────────────┐  ┌───────────────────────────┐
-│  JUPYTER         │  │       BI LAYER            │
-│  NOTEBOOK        │  │                           │
-│  Executed EDA    │  │  Tableau Desktop          │
-│  Inline charts   │  │  Dashboard 1: Sales       │
-│  RFM analysis    │  │  Dashboard 2: Customers   │
-│                  │  │  Dashboard 3: Products    │
-│                  │  │                           │
-│                  │  │  Power BI Desktop         │
-│                  │  │  Page 1: Sales Overview   │
-│                  │  │  Page 2: Customer Analysis│
-│                  │  │  Page 3: Product Perf     │
-└──────────────────┘  └───────────────────────────┘
+│   staging_covid     (TEXT staging table)        │
+│   dim_country       (237 rows)                  │
+│   dim_date          (1,688 rows)                │
+│   fact_covid_daily  (395,311 rows)              │
+│   7 Dashboard Views                             │
+└──────────┬───────────────────┬──────────────────┘
+▼                   ▼
+┌──────────────────┐  ┌────────────────────────────┐
+│  JUPYTER         │  │        BI LAYER            │
+│  NOTEBOOK        │  │                            │
+│  7-cell EDA      │  │  Plotly Dash  :8050        │
+│  Plotly charts   │  │  Tableau Desktop           │
+│  Wave analysis   │  │  Power BI Desktop          │
+└──────────────────┘  └────────────────────────────┘
 
 ---
 
 ## 📁 Folder Structure
-ecommerce-sales-analysis/
+covid19-data-analysis/
 │
-├── requirements.txt                    # All Python dependencies
-├── README.md                           # Project documentation
-├── .gitignore                          # Git exclusion rules
-├── setup.sh                            # Mac/Linux environment setup
-├── setup.bat                           # Windows environment setup
+├── run.py                          # Master pipeline orchestrator
+├── requirements.txt                # All Python dependencies
+├── README.md                       # Project documentation
+├── .env.example                    # Environment variables template
+├── .gitignore                      # Git exclusion rules
 │
-├── scripts/                            # Python pipeline scripts
-│   ├── generate_data.py                # Step 1 — Synthetic data generation
-│   ├── data_cleaning.py                # Step 2 — Cleaning + RFM scoring
-│   ├── eda_analysis.py                 # Step 3 — EDA + 8 visualizations
-│   └── dashboard_export.py             # Step 4 — BI-ready CSV exports
+├── src/
+│   ├── init.py
+│   ├── data_collection.py
+│   ├── data_cleaning.py
+│   ├── analysis.py
+│   └── database.py
 │
-├── sql/                                # SQL files
-│   └── queries.sql                     # 8 business analysis queries
+├── sql/
+│   ├── create_tables.sql
+│   ├── views.sql
+│   └── analysis_queries.sql
 │
 ├── notebooks/
-│   └── ecommerce_analysis.ipynb        # Fully executed EDA notebook
+│   └── exploratory_analysis.ipynb
 │
-├── dashboards/
-│   └── DASHBOARD_GUIDE.md             # Tableau + Power BI build guide
+├── dashboard/
+│   ├── app.py
+│   ├── layouts.py
+│   ├── callbacks.py
+│   ├── assets/
+│   └── COVID19_Dashboard.twb
 │
 ├── data/
-│   ├── raw/                            # Original generated data
-│   │   ├── customers.csv               # 1,000 customers (Indian locale)
-│   │   ├── products.csv                # 100 products across 6 categories
-│   │   ├── orders.csv                  # 5,000 orders (2022-2024)
-│   │   ├── order_items.csv             # 8,000 order line items
-│   │   └── ecommerce.db                # SQLite DB (all 4 tables loaded)
-│   │
-│   └── processed/                      # Cleaned & feature-engineered data
-│       ├── customers_clean.csv         # + tenure_days column
-│       ├── products_clean.csv          # + profit_margin column
-│       ├── orders_clean.csv            # + year/month/quarter/weekday
-│       ├── order_items_clean.csv       # + recalculated total_price
-│       ├── rfm_scores.csv              # RFM scores + segment labels
-│       │
-│       └── dashboard_exports/          # Tableau & Power BI ready files
-│           ├── kpi_summary.csv         # 1-row KPI snapshot for cards
-│           ├── monthly_revenue.csv     # Year-month revenue trend
-│           ├── category_performance.csv
-│           ├── customer_segments.csv   # Customers merged with RFM
-│           ├── product_performance.csv
-│           └── daily_orders.csv        # Gap-filled daily orders (731 rows)
+│   ├── raw/
+│   └── processed/
+│       ├── covid_cleaned.csv
+│       ├── india_covid.csv
+│       ├── country_summary.csv
+│       ├── analysis/
+│       │   ├── risk_scores.csv
+│       │   ├── correlation_matrix.csv
+│       │   └── india_with_waves.csv
+│       └── sql_results/
 │
-└── outputs/
-└── plots/                          # All chart outputs (PNG, 150 DPI)
-├── top_products_revenue.png
-├── monthly_revenue_trend.png
-├── revenue_by_category.png
-├── orders_by_payment_method.png
-├── customer_segment_distribution.png
-├── rfm_segment_distribution.png
-├── weekly_order_trend.png
-├── category_return_rate.png
-├── dashboard_sales_overview.png
-├── dashboard_customer_intelligence.png
-├── dashboard_product_performance.png
-├── powerbi_sales_overview.png
-├── powerbi_customer_analysis.png
-└── powerbi_product_performance.png
+└── docs/
+└── screenshots/
+
+---
+
+## 🗄 Database Schema
+┌─────────────────┐         ┌──────────────────────┐
+│   dim_country   │         │      dim_date        │
+│─────────────────│         │──────────────────────│
+│ iso_code (PK)   │         │ date_key (PK)        │
+│ location        │         │ year                 │
+│ continent       │         │ quarter              │
+│ population      │         │ month / month_name   │
+│ median_age      │         │ day_of_week          │
+│ gdp_per_capita  │         │ week_of_year         │
+│ human_dev_index │         └──────────┬───────────┘
+└────────┬────────┘                    │
+└──────────────┬──────────────┘
+▼
+┌────────────────────────┐
+│    fact_covid_daily    │
+│────────────────────────│
+│ iso_code (FK)          │
+│ date (FK)              │
+│ total_cases            │
+│ new_cases              │
+│ new_cases_smoothed     │
+│ total_deaths           │
+│ new_deaths             │
+│ total_vaccinations     │
+│ people_fully_vaccinated│
+│ vaccination_rate       │
+│ case_fatality_rate     │
+│ rolling_7day_cases     │
+│ rolling_14day_cases    │
+│ wave_number            │
+└────────────────────────┘
+
+> ⚠ **IMPORTANT:** `total_*` columns are CUMULATIVE.
+> Always use `MAX()` — never `SUM()` across dates.
 
 ---
 
 ## ▶ How to Run
 
 ### Prerequisites
-- Python 3.11+
-- Tableau Desktop (for Tableau dashboards)
-- Power BI Desktop (for Power BI dashboards)
+- Python 3.9+
+- PostgreSQL 18 installed and running
+- Tableau Desktop
+- Power BI Desktop
 
 ### Step 1 — Clone Repository
 ```bash
-git clone https://github.com/manoharpothireddy/ecommerce-sales-analysis.git
-cd ecommerce-sales-analysis
+git clone https://github.com/manoharpothireddy/covid19-data-analysis.git
+cd covid19-data-analysis
 ```
 
 ### Step 2 — Create Virtual Environment
-
-**Windows:**
-```bat
-setup.bat
+```bash
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 ```
 
-**macOS / Linux:**
+### Step 3 — Install Dependencies
 ```bash
-chmod +x setup.sh && ./setup.sh
+pip install -r requirements.txt
 ```
 
-### Step 3 — Run Full Pipeline
+### Step 4 — Configure Environment
 ```bash
-python scripts/generate_data.py
-python scripts/data_cleaning.py
-python scripts/eda_analysis.py
-python scripts/dashboard_export.py
+copy .env.example .env
+# Set DB_PASSWORD=your_password in .env
+```
+
+### Step 5 — Create PostgreSQL Database
+```sql
+CREATE DATABASE covid19_analysis;
+```
+
+### Step 6 — Run Full Pipeline
+```bash
+python run.py
 ```
 
 Expected output:
-[1/4] Data Generation    ✔  PASSED  (14,100 rows created)
-[2/4] Data Cleaning      ✔  PASSED  (RFM scores computed)
-[3/4] EDA Analysis       ✔  PASSED  (8 plots saved)
-[4/4] Dashboard Export   ✔  PASSED  (6 CSV files exported)
+[1/4] Data Collection   ✔  PASSED  (93.8 MB downloaded)
+[2/4] Data Cleaning     ✔  PASSED  (395,311 rows processed)
+[3/4] Analysis          ✔  PASSED  (6 India waves detected)
+[4/4] Database Load     ✔  PASSED  (star schema populated)
 
-### Step 4 — Launch Jupyter Notebook (Optional)
+### Step 7 — Launch Dash Dashboard
 ```bash
-jupyter notebook notebooks/ecommerce_analysis.ipynb
+cd dashboard
+python app.py
+# Open → http://127.0.0.1:8050
 ```
 
-### Step 5 — Connect to Tableau / Power BI
+### Step 8 — Open Jupyter Notebook
+```bash
+jupyter notebook notebooks/exploratory_analysis.ipynb
+```
 
-Open Tableau Desktop or Power BI Desktop
-Connect to Text File / CSV
-Navigate to data/processed/dashboard_exports/
-Load all 6 CSV files
-Follow dashboards/DASHBOARD_GUIDE.md for build steps
-
+### ⚙ CLI Flags
+```bash
+python run.py --skip-download
+python run.py --skip-db
+python run.py --skip-download --reload
+```
 
 ---
 
 ## 📊 Key Findings
 
-### 💰 Revenue Overview
+### 🇮🇳 India — 6 Pandemic Waves Detected
 
-| KPI | Value |
-|-----|-------|
-| Total Revenue | Rs 4.88 Cr (delivered orders only) |
-| Total Orders | 5,000 |
-| Delivered Orders | 3,470 (69.4%) |
-| Returned Orders | 505 (10.1%) |
-| Cancelled Orders | 505 (10.1%) |
-| Avg Order Value | Rs 14,067 |
-| Total Customers | 1,000 |
+| Wave | Peak Date | Peak Daily Cases | Variant |
+|------|-----------|-----------------|---------|
+| Wave 1 | 23 Sep 2020 | 92,323 | Original strain |
+| Wave 2 | 12 May 2021 | 391,280 | Delta (deadliest) |
+| Wave 3 | 08 Sep 2021 | 41,949 | Delta sub-variant |
+| Wave 4 | 26 Jan 2022 | 302,157 | Omicron BA.1 |
+| Wave 5 | 27 Jul 2022 | 19,737 | Omicron BA.4/5 |
+| Wave 6 | 26 Apr 2023 | 10,553 | XBB sub-variants |
 
-### 🏆 Category Performance
+### 💉 Vaccination Impact
+- **Pearson r = −0.41** (p < 0.001) between vaccination rate and CFR
+- **Spearman ρ = −0.55** (p < 0.001)
+- Higher vaccination rates linked to lower case fatality rates
 
-| Category | Revenue | Share | Return Rate |
-|----------|---------|-------|-------------|
-| Electronics | Rs 1.49 Cr | 21.0% | 10.38% |
-| Sports | Rs 1.11 Cr | 15.7% | 11.15% |
-| Home & Kitchen | Rs 1.10 Cr | 15.5% | 8.97% |
-| Clothing | Rs 0.61 Cr | 8.7% | 10.14% |
-| Beauty | Rs 0.41 Cr | 5.7% | 11.52% |
-| Books | Rs 0.16 Cr | 2.3% | 9.15% |
+### 🔺 High-Risk Country Scoring
+Composite Risk = (CFR × 0.4) + (Deaths/M × 0.4) + (1 − VaxRate × 0.2)
 
-### 💳 Payment Methods
-
-| Method | Orders | Share |
-|--------|--------|-------|
-| UPI | 1,766 | 35.3% |
-| Credit Card | 1,240 | 24.8% |
-| Debit Card | 980 | 19.6% |
-| Net Banking | 510 | 10.2% |
-| COD | 504 | 10.1% |
-
-### 👥 RFM Customer Segments
-
-| Segment | Count | % | Avg Spend | Avg Orders | Avg Recency |
-|---------|-------|---|-----------|------------|-------------|
-| Loyal Customers | 426 | 44.4% | Rs 65,997 | 4.7 | 142 days |
-| Others | 246 | 25.6% | Rs 31,845 | 2.3 | 95 days |
-| At Risk | 118 | 12.3% | Rs 39,141 | 2.9 | 288 days |
-| Lost | 116 | 12.1% | Rs 19,766 | 1.5 | 447 days |
-| Champions | 54 | 5.6% | Rs 1,10,257 | 6.8 | 25 days |
-
-### 🌟 Notable Insights
-
-- Peak AOV Month: November 2022 — Rs 21,608 average order value (festive season)
-- Top Customer: Shanaya Sood (Premium, Pune) — Rs 2,26,615 across 11 orders
-- Top Product: Wireless Earbuds — Rs 23,34,075 total revenue
-- Champions (5.6%) average Rs 1.1 Lakh spend with only 25 days since last order
-- Lost segment (12.1%) has not ordered in 447 days — prime re-engagement targets
-- Beauty has highest return rate at 11.52% — needs product quality review
-- UPI dominates at 35.3% — offering UPI cashback could increase basket size
+### 🌍 Global Statistics
+- Total confirmed cases: **776M+**
+- Total deaths: **7M+**
+- Countries analyzed: **237**
+- Date range: **Jan 2020 – Aug 2024**
 
 ---
 
 ## 📸 Dashboard Screenshots
 
-### Tableau — Sales Overview Dashboard
-![Sales Overview](outputs/plots/dashboard_sales_overview.png)
+### Plotly Dash
+![Dash](docs/screenshots/dash_dashboard.png)
 
-### Tableau — Customer Intelligence Dashboard
-![Customer Intelligence](outputs/plots/dashboard_customer_intelligence.png)
+### Tableau — Global Executive Dashboard
+![Tableau](docs/screenshots/tableau_dashboard.png)
 
-### Tableau — Product Performance Dashboard
-![Product Performance](outputs/plots/dashboard_product_performance.png)
+### Power BI — Global Overview
+![Power BI Global](docs/screenshots/powerbi_global.png)
 
-### Power BI — Sales Overview
-![Power BI Sales](outputs/plots/powerbi_sales_overview.png)
+### Power BI — India Deep Dive
+![Power BI India](docs/screenshots/powerbi_india.png)
 
-### Power BI — Customer Analysis
-![Power BI Customer](outputs/plots/powerbi_customer_analysis.png)
-
-### Power BI — Product Performance
-![Power BI Product](outputs/plots/powerbi_product_performance.png)
+### Jupyter — India Wave Analysis
+![Jupyter Waves](docs/screenshots/jupyter_india_waves.png)
 
 ---
 
 ## 🗂 SQL Highlights
 
-### 8 Business SQL Queries in sql/queries.sql
-
-| # | Query | Technique |
-|---|-------|-----------|
-| 1 | Top 10 best-selling products by revenue | GROUP BY + ORDER BY |
-| 2 | Monthly revenue trend for 2022 and 2023 | strftime + GROUP BY |
-| 3 | Revenue by product category with share % | SUM + ROUND |
-| 4 | Customer count by segment | GROUP BY + COUNT |
-| 5 | Top 10 customers by total spend | JOIN + GROUP BY |
-| 6 | Orders by payment method with status breakdown | CASE WHEN |
-| 7 | Return rate by product category | CAST + ROUND |
-| 8 | Average order value by month | AVG + strftime |
-
-### Key SQL Techniques Used
+| View | Purpose |
+|------|---------|
+| `v_country_latest` | Latest snapshot per country |
+| `v_global_daily_trend` | Daily global aggregates |
+| `v_india_timeline` | India daily timeline |
+| `v_continental_summary` | Continent rollup |
+| `v_high_risk_countries` | Top 20 risk countries |
+| `v_vaccination_progress` | Vaccination over time |
+| `v_india_vs_benchmarks` | India vs USA, Brazil, UK |
 
 ```sql
--- 1. Revenue by category with percentage share
-SELECT p.category,
-       SUM(oi.total_price) AS total_revenue,
-       ROUND(SUM(oi.total_price) * 100.0 /
-             (SELECT SUM(total_price) FROM order_items), 2) AS share_pct
-FROM order_items oi
-JOIN products p ON oi.product_id = p.product_id
-GROUP BY p.category
-ORDER BY total_revenue DESC;
+-- Safe cumulative aggregation
+SELECT DISTINCT ON (iso_code) *
+FROM fact_covid_daily
+ORDER BY iso_code, date DESC;
 
--- 2. Return rate by category
-SELECT p.category,
-       ROUND(CAST(SUM(CASE WHEN o.status = 'Returned'
-             THEN 1 ELSE 0 END) AS FLOAT) /
-             COUNT(*) * 100, 2) AS return_rate_pct
-FROM orders o
-JOIN order_items oi ON o.order_id = oi.order_id
-JOIN products p ON oi.product_id = p.product_id
-GROUP BY p.category
-ORDER BY return_rate_pct DESC;
-
--- 3. Top 10 customers by total spend
-SELECT c.customer_id, c.name, c.customer_segment,
-       SUM(oi.total_price) AS total_spend,
-       COUNT(DISTINCT o.order_id) AS total_orders
-FROM customers c
-JOIN orders o ON c.customer_id = o.customer_id
-JOIN order_items oi ON o.order_id = oi.order_id
-WHERE o.status = 'Delivered'
-GROUP BY c.customer_id
-ORDER BY total_spend DESC
-LIMIT 10;
+-- Month-over-Month growth
+LAG(SUM(new_cases)) OVER (
+    PARTITION BY location
+    ORDER BY DATE_TRUNC('month', date)
+) AS prev_month_cases
 ```
 
 ---
 
-## 📋 Dataset Details
+## 📋 Dataset Source & Credits
 
 | Item | Detail |
 |------|--------|
-| **Type** | Fully synthetic (generated with Faker + NumPy) |
-| **Locale** | Indian (names, cities, states) |
-| **Seed** | 42 (fully reproducible) |
-| **Customers** | 1,000 rows |
-| **Products** | 100 rows across 6 categories |
-| **Orders** | 5,000 rows (2022-2024) |
-| **Order Items** | 8,000 rows |
-| **Total Records** | 14,100 rows |
-| **Database** | SQLite (ecommerce.db) |
+| **Dataset** | Our World in Data COVID-19 Dataset |
+| **URL** | https://github.com/owid/covid-19-data |
+| **Coverage** | 237 countries, Jan 2020 – present |
+| **Records** | 395,311 rows, 48 columns |
+| **License** | Creative Commons BY 4.0 |
+
+> Mathieu, E., Ritchie, H., Rodés-Guirao, L. et al.
+> "Coronavirus Pandemic (COVID-19)." Our World in Data (2020).
 
 ---
 
 ## 👤 Author
 
-**P Manohar Reddy**
+**Manohar Pothireddy**
 - GitHub: [@manoharpothireddy](https://github.com/manoharpothireddy)
-- LinkedIn: [Manohar Reddy Pothireddy](https://www.linkedin.com/in/manohar-reddy-pothireddy-3ab1a7319/)
-- Email: p.manoharreddy789809@gmail.com
+- Project: [covid19-data-analysis](https://github.com/manoharpothireddy/covid19-data-analysis)
 
 ---
 
 *Built as a portfolio project demonstrating end-to-end data analytics skills
-using Python, SQL, SQLite, Tableau, and Power BI.*
+using Python, SQL, PostgreSQL, Tableau, and Power BI.*
